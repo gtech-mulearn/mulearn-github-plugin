@@ -1,0 +1,14 @@
+// Place at the root of the leaderboard app repo (gtech-mulearn/leaderboard).
+// Vercel builds the static site from data cloned at build time. Scraping is NOT
+// done here — the data repo's scheduled Action commits fresh data and fires the
+// Vercel deploy hook.
+//
+// Set in Vercel Project → Settings → Environment Variables:
+//   LEADERBOARD_DATA_DIR = ./data
+//
+// (Remove the // comments before committing — vercel.json must be strict JSON.)
+{
+  "installCommand": "pnpm install",
+  "buildCommand": "git clone --depth 1 https://github.com/gtech-mulearn/contributions-data data && pnpm build:web",
+  "outputDirectory": "apps/leaderboard-web/out"
+}

@@ -1,0 +1,25 @@
+{
+  "name": "mulearn-github-plugin",
+  "version": "0.1.0",
+  "description": "Leaderboard plugin that tracks contributions across the entire gtech-mulearn GitHub org (GitHub App auth, GraphQL, incremental).",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "leaderboard",
+    "plugin",
+    "github",
+    "mulearn"
+  ],
+  "devDependencies": {
+    "@ohcnetwork/leaderboard-api": "^0.1.0",
+    "@types/node": "^20.19.27",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.3"
+  },
+  "author": "muLearn",
+  "license": "MIT"
+}

@@ -1,0 +1,7 @@
+node_modules/
+*.log
+.env
+*.pem
+
+# NOTE: dist/ is intentionally committed — jsDelivr serves dist/index.js
+# directly from this repo (see config.yaml plugin `source:` URL).

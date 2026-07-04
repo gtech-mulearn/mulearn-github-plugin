@@ -1,0 +1,63 @@
+# Place at: gtech-mulearn/contributions-data/.github/workflows/scrape.yml
+# Scheduled scrape that commits updated contribution data, then triggers a
+# Vercel deploy. Keeps the org-wide scrape off the Vercel build (which only
+# renders the already-committed data).
+name: Scrape contributions
+
+on:
+  schedule:
+    - cron: "0 */6 * * *" # every 6 hours
+  workflow_dispatch:
+
+concurrency:
+  group: scrape
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout data repo
+        uses: actions/checkout@v4
+
+      - name: Checkout leaderboard app
+        uses: actions/checkout@v4
+        with:
+          repository: gtech-mulearn/leaderboard
+          path: app
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: app/pnpm-lock.yaml
+
+      - name: Install & build packages
+        working-directory: app
+        run: pnpm install --frozen-lockfile && pnpm build:packages
+
+      - name: Scrape + export
+        working-directory: app
+        env:
+          LEADERBOARD_DATA_DIR: ${{ github.workspace }}
+          GH_APP_ID: ${{ secrets.GH_APP_ID }}
+          GH_APP_PRIVATE_KEY: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          GH_APP_INSTALLATION_ID: ${{ secrets.GH_APP_INSTALLATION_ID }}
+        run: |
+          pnpm data:scrape
+          pnpm data:aggregate
+          pnpm data:evaluate
+          pnpm data:export
+
+      - name: Commit updated data
+        run: |
+          git config user.name "mulearn-bot"
+          git config user.email "bot@mulearn.org"
+          git add -A
+          git commit -m "chore: update contributions $(date -u +%FT%TZ)" || exit 0
+          git push
+
+      - name: Trigger Vercel deploy
+        if: success()
+        run: curl -fsS -X POST "${{ secrets.VERCEL_DEPLOY_HOOK }}"
